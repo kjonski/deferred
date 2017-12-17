@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript">
+        function ScriptAssetLoad (path) {
+            this.path = path;
+            this.exec = function () {
+                var element = document.createElement("script");
+                element.src = this.path;
+                document.body.appendChild(element);
+            }
+        }
+        function ScriptExecution(callable) {
+            this.callable = callable;
+            this.exec = function () {
+                this.callable();
+            }
+        }
+        var deferred = function () {
+            var items = [];
+
+            var addScriptLoad = function (path) {
+                items.push(new ScriptAssetLoad(path));
+            };
+            var addScriptExecution = function (callable) {
+                items.push(new ScriptExecution(callable));
+            };
+            var run = function () {
+                function downloadJSAtOnload() {
+                    for (var i in items) {
+                        items[i].exec();
+                        delete(items[i]);
+                    }
+                }
+
+                if (window.addEventListener)
+                    window.addEventListener("load", downloadJSAtOnload, false);
+                else if (window.attachEvent)
+                    window.attachEvent("onload", downloadJSAtOnload);
+                else window.onload = downloadJSAtOnload;
+            };
+            return {
+                addScriptLoad: addScriptLoad,
+                addScriptExecution: addScriptExecution,
+                run: run
+            }
+        }();
+
+        deferred.addScriptLoad('https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js');
+        deferred.addScriptExecution(function () {
+            console.log('called defered');
+        });
+    </script>
+</head>
+<body>
+<img src="http://lorempixel.com/400/200/nightlife" alt="random" />
+<img src="http://lorempixel.com/400/200/abstract" alt="random" />
+<img src="http://lorempixel.com/400/200/city" alt="random" />
+
+<script type="text/javascript">
+    deferred.run();
+</script>
+</body>
+</html>
