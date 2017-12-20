@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <script type="text/javascript">
-        function ScriptAssetLoad (path) {
+        function ScriptAssetLoad (path, async) {
             this.path = path;
+            this.async = typeof async !== 'undefined' ? async : true;
             this.exec = function () {
                 var element = document.createElement("script");
                 element.src = this.path;
+                if (!this.async){
+                    element.async = false;
+                }
                 document.body.appendChild(element);
             }
         }
@@ -20,8 +24,8 @@
         var deferred = function () {
             var items = [];
 
-            var addScriptLoad = function (path) {
-                items.push(new ScriptAssetLoad(path));
+            var addScriptLoad = function (path, async) {
+                items.push(new ScriptAssetLoad(path, async));
             };
             var addScriptExecution = function (callable) {
                 items.push(new ScriptExecution(callable));
@@ -47,7 +51,8 @@
             }
         }();
 
-        deferred.addScriptLoad('https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js');
+        deferred.addScriptLoad('https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js', false);
+        deferred.addScriptLoad('https://code.jquery.com/ui/1.12.0/jquery-ui.js');
         deferred.addScriptExecution(function () {
             console.log('called defered');
         });
